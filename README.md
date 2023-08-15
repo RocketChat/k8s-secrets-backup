@@ -1,6 +1,6 @@
 # k8s-secrets-backup
 
-### 🤔: What is it? 
+### 🤔 What is it? 
 A generic tool to backup kubernetes secrets, encrypt the backup and upload it to a S3 bucket.
 
 It was designed to run as a cronjob inside our Kubernetes clusters to backup sealed secrets controller's keys, but it can be used to backup any secret, or secrets depending if the env variable SECRET_NAME is set, or LABEL_KEY and LABEL_VALUE is. If a label key and value to filter a set of secrets is set, then the output is a k8s SecretList.
@@ -24,7 +24,7 @@ AWS_SECRET_ACCESS_KEY               | "asdASFadfasdfñiouo3Q334" | AWS access se
 AGE_PUBLIC_KEY           | "age435fgañdfgjñdsflgjgadf"                            | Age public key matching your private key for decrypt 
 
 
-#### 🧞: Kubernetes manifests (examples) 
+#### 🧞 Kubernetes manifests (examples) 
 
 Backup sealed secrets controller's keys once per month
 ```
