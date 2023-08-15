@@ -17,7 +17,7 @@ NAMESPACE          | "kube-system" | The namespace where the secret to backup is
 LABEL_KEY        | "sealedsecrets.bitnami.com/sealed-secrets-key" | Optional, secret label key to filter secrets to backup
 LABEL_VALUE        | "active"                    | Optional, secret label value to filter secrets to backup
 BUCKET_NAME             | "secretsbackups.your.domain"                    | AWS s3 bucket name to upload the backups
-S3_FOLDER             | "sealed_secrets_keys"                               |  AWS s3 folder name to upload the backups
+S3_FOLDER             | "sealed_secrets_keys/"                               |  AWS s3 folder name to upload the backups
 S3_REGION              | "us-east-2"                          | AWS s3 region name
 AWS_ACCESS_KEY_ID           | "ADSFASDFAF23423"                       | AWS access key that has upload permission on the s3 bucket 
 AWS_SECRET_ACCESS_KEY               | "asdASFadfasdfñiouo3Q334" | AWS access secret that has upload permission on the s3 bucket
