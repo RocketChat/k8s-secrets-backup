@@ -7,6 +7,8 @@ It was designed to run as a cronjob inside our Kubernetes clusters to backup sea
 
 Important note: It assumes a configmap with the k8s cluster name is previously created on the kube-system namespace. More info on Kubernetes manifests examples section.
 
+Another less important note: Age encryption is done to an ASCII-only "armored" encoding, decryption is transparent for age command.
+
 #### :ballot_box_with_check: Environment variables (required, except if explicity says optional)
 | Name                  | Example                              | Help                                                     |
 | --------------------- | ------------------------------------ | -------------------------------------------------------- |
