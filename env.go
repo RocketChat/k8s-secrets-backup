@@ -37,7 +37,7 @@ func init() {
 	labelValue = os.Getenv("LABEL_VALUE")
 
 	if secretName == "" {
-		if labelKey == "" || labelValue = "" {
+		if labelKey == "" || labelValue == "" {
 			panic("please provide either the environmental variable SECRET_NAME or both environmental variables LABEL_KEY and LABEL_VALUE")
 		}
 	} else {
