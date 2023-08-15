@@ -1,13 +1,13 @@
 # k8s-secrets-backup
 
-### :thinking: What is it? 
+### 🤔: What is it? 
 A generic tool to backup kubernetes secrets, encrypt the backup and upload it to a S3 bucket.
 
 It was designed to run as a cronjob inside our Kubernetes clusters to backup sealed secrets controller's keys, but it can be used to backup any secret, or secrets depending if the env variable SECRET_NAME is set, or LABEL_KEY and LABEL_VALUE is. If a label key and value to filter a set of secrets is set, then the output is a k8s SecretList.
 
 Important note: It assumes a configmap with the k8s cluster name is previously created on the kube-system namespace. More info on Kubernetes manifests examples section.
 
-Another less important note: Age encryption is done to an ASCII-only "armored" encoding, decryption is transparent for age command.
+Another less important note: Age encryption is done to an ASCII-only "armored" encoding, decryption is transparent for the age command.
 
 #### :ballot_box_with_check: Environment variables (required, except if explicity says optional)
 | Name                  | Example                              | Help                                                     |
@@ -24,7 +24,7 @@ AWS_SECRET_ACCESS_KEY               | "asdASFadfasdfñiouo3Q334" | AWS access se
 AGE_PUBLIC_KEY           | "age435fgañdfgjñdsflgjgadf"                            | Age public key matching your private key for decrypt 
 
 
-#### :genie: Kubernetes manifests (examples) 
+#### 🧞: Kubernetes manifests (examples) 
 
 Backup sealed secrets controller's keys once per month
 ```
@@ -42,7 +42,7 @@ spec:
           serviceAccountName: sealed-secrets-keys-sentinel
           containers:
           - name: sealed-secrets-keys-sentinel
-            image: k8s-secrets-backup
+            image: rocketchat/k8s-secrets-backup
             imagePullPolicy: Always
             env:
             - name: NAMESPACE
