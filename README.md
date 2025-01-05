@@ -1,30 +1,34 @@
 # k8s-secrets-backup
 
-### 🤔 What is it? 
+### 🤔 What is it?
 A generic tool to backup kubernetes secrets, encrypt the backup and upload it to a S3 bucket.
 
-It was designed to run as a cronjob inside our Kubernetes clusters to backup sealed secrets controller's keys, but it can be used to backup any secret, or secrets depending if the env variable SECRET_NAME is set, or LABEL_KEY and LABEL_VALUE is. If a label key and value to filter a set of secrets is set, then the output is a k8s SecretList.
-
-Important note: It assumes a configmap with the k8s cluster name is previously created on the kube-system namespace. More info on Kubernetes manifests examples section.
+It was designed to run as a cronjob inside our Kubernetes clusters to backup sealed secrets controller's keys, but it can be used to backup any secret, or secrets depending if the env variable SECRET__NAME is set, or SECRET__LABEL_KEY and SECRET__LABEL_VALUE is. If the label key and value is set, then the output is a k8s SecretList.
 
 Another less important note: Age encryption is done to an ASCII-only "armored" encoding, decryption is transparent for the age command.
 
 #### :ballot_box_with_check: Environment variables (required, except if explicity says optional)
-| Name                  | Example                              | Help                                                     |
-| --------------------- | ------------------------------------ | -------------------------------------------------------- |
-SECRET_NAME   | "mongodb-secret"                     | Optional, the secret name to backup
-NAMESPACE          | "kube-system" | The namespace where the secret to backup is
-LABEL_KEY        | "sealedsecrets.bitnami.com/sealed-secrets-key" | Optional, secret label key to filter secrets to backup
-LABEL_VALUE        | "active"                    | Optional, secret label value to filter secrets to backup
-BUCKET_NAME             | "secretsbackups.your.domain"                    | AWS s3 bucket name to upload the backups
-S3_FOLDER             | "sealed_secrets_keys/"                               |  AWS s3 folder name to upload the backups
-S3_REGION              | "us-east-2"                          | AWS s3 region name
-AWS_ACCESS_KEY_ID           | "ADSFASDFAF23423"                       | AWS access key that has upload permission on the s3 bucket 
-AWS_SECRET_ACCESS_KEY               | "asdASFadfasdfñiouo3Q334" | AWS access secret that has upload permission on the s3 bucket
-AGE_PUBLIC_KEY           | "age435fgañdfgjñdsflgjgadf"                            | Age public key matching your private key for decrypt 
+| Name                               | example                                        | help                                                                                |
+| ---------------------------------- | ---------------------------------------------- | ----------------------------------------------------------------------------------- |
+| AGE_PUBLIC_KEY                     | "age435fgañdfgjñdsflgjgadf"                    | Age public key matching your private key for decrypt                                |
+| BACKUP_DIR                         | "backups"                                      | Optional: the directory to dump the backed up secret file before uploading it to s3 |
+| S3__BUCKET_NAME                    | "bucket-name"                                  | AWS s3 bucket name to upload the backups                                            |
+| S3__PATH                           | "path"                                         | AWS S3 path to upload the backups to                                                |
+| S3__REGION                         | "us-east-2"                                    | AWS s3 region name                                                                  |
+| S3__ACCESS_KEY                     | "sample-access-key"                            | AWS access key that has upload permission on the s3 bucket                          |
+| S3__SECRET_KEY                     | "sample-secret-key"                            | AWS access secret that has upload permission on the s3 bucket                       |
+| S3__ENDPOINT                       | "http://minio:9000"                            | Optional: S3 endpoint, to support different s3 providers                            |
+| S3__USE_PATH_STYLE                 | "true"                                         | Optional: use path style addressing for s3                                          |
+| SECRET__NAMESPACE                  | "kube-system"                                  | The namespace where the secret to backup is                                         |
+| SECRET__NAME                       | "name-of-secret"                               | Optional: the secret name to backup (provide this or the secrets label and value)   |
+| SECRET__LABEL_KEY                  | "sealedsecrets.bitnami.com/sealed-secrets-key" | Optional: secret label key to filter secrets to backup                              |
+| SECRET__LABEL_VALUE                | "active"                                       | Optional: secret label value to filter secrets to backup                            |
+| CLUSTER__NAME                      | "your-cluster-name"                            | Optional: The name of the cluster (either provide this value or the values below)   |
+| CLUSTER__NAME_CONFIG_MAP_NAMESPACE | "kube-system"                                  | Optional: The namespace where the cluster name configmap is                         |
+| CLUSTER__NAME_CONFIG_MAP_NAME      | "cluster-info"                                 | Optional: The name of the configmap with the cluster name                           |
+| CLUSTER__NAME_CONFIG_MAP_KEY       | "cluster-name"                                 | Optional: The key of the cluster name in the configmap                              |
 
-
-#### 🧞 Kubernetes manifests (examples) 
+#### 🧞 Kubernetes manifests (examples)
 
 Backup sealed secrets controller's keys once per month
 ```
@@ -45,31 +49,32 @@ spec:
             image: rocketchat/k8s-secrets-backup
             imagePullPolicy: Always
             env:
-            - name: NAMESPACE
+            - name: SECRET__NAMESPACE
               value: kube-system
-            - name: LABEL_KEY
+            - name: SECRET__LABEL_KEY
               value: sealedsecrets.bitnami.com/sealed-secrets-key
-            - name: LABEL_VALUE
+            - name: SECRET__LABEL_VALUE
               value: active
-            - name: BUCKET_NAME
+            - name: S3__BUCKET_NAME
               value: secretsbackups.your.domain
-            - name: S3_FOLDER
-              value: sealed_secrets_keys/
-            - name: S3_REGION
+            - name: S3__PATH
+              value: sealed_secrets_keys
+            - name: S3__REGION
               value: us-east-2
             - name: AGE_PUBLIC_KEY
               value: age435fgañdfgjñdsflgjgadf
-            - name: AWS_ACCESS_KEY_ID
+            - name: CLUSTER__NAME
+              value: my_cluster
+            - name: S3__ACCESS_KEY
               valueFrom:
                 secretKeyRef:
                   key: awsAccessKeyID
                   name: sealed-secrets-keys-sentinel-secret
-            - name: AWS_SECRET_ACCESS_KEY
+            - name: S3__SECRET_KEY
               valueFrom:
                 secretKeyRef:
                   key: awsSecretAccessKey
                   name: sealed-secrets-keys-sentinel-secret
-            command: ["/app/k8s-secrets-backup"]
             resources:
               limits:
                 cpu: "1"
@@ -89,7 +94,7 @@ metadata:
   namespace: kube-system
 rules:
 - apiGroups: [""]
-  resources: ["secrets", "configmaps"]
+  resources: ["secrets", "configmaps"] # configmaps are needed if you provide the cluster name in a configmap
   verbs: ["list", "get"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
@@ -138,6 +143,7 @@ roleRef:
   apiGroup: rbac.authorization.k8s.io
 
 ---
+# only needed if you provide the cluster name in a configmap
 apiVersion: v1
 kind: ConfigMap
 metadata:

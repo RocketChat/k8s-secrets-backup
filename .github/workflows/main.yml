@@ -23,18 +23,18 @@ jobs:
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v3
-      
-      - uses: actions/setup-go@v3
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
         with:
-          go-version: "=1.20"
-          
-      - uses: docker/login-action@v2
+          go-version: "=1.23"
+
+      - uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERREGISTRY_USERNAME }}
           password: ${{ secrets.DOCKERREGISTRY_PASSWORD}}
 
-      - uses: docker/build-push-action@v3
+      - uses: docker/build-push-action@v6
         with:
           context: ${{ github.workspace }}
           platforms: linux/amd64
